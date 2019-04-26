@@ -1,4 +1,5 @@
-from Bio import Entrez, SeqIO
+from Bio import Entrez, SeqIO, Seq
+from Bio.Alphabet import IUPAC
 
 class Fasta_Analysis():
     '''
@@ -20,7 +21,29 @@ class Fasta_Analysis():
         SeqIO.write(seq, fasta, 'fasta')
         fasta.close()
     
+    def print_basic_information(self, fasta = '../../../DataLists/CookbookData/NM_002299.fasta'):
+        recs = SeqIO.parse(fasta, 'fasta')
+        for rec in recs:
+            seq = rec.seq
+            print(rec.description)
+            print(seq[:10])
+            print(seq.alphabet)
+        return seq
+
+    def transcribe_translate(self, seq):
+        '''
+        I don't know why need we to change the alphabet from single letter alphabet to unambiguous_dna alphabet
+        The original seq can be transcribed/translated too.
+        '''
+        seq = Seq.Seq(str(seq), IUPAC.unambiguous_dna)
+        rna = seq.transcribe()
+        protein = seq.translate()
+        print("RNA: ", rna)
+        print("Protein: ", protein)
 
 if __name__ == '__main__':
     fa = Fasta_Analysis()
-    fa.write_fasta()
+    # fia.write_fasta()
+    seq = fa.print_basic_information()
+    fa.transcribe_translate(seq)
+    

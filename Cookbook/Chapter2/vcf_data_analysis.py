@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from variant_calling_format import Variant_Calling_Format
 import numpy as np
 from collections import defaultdict
+import seaborn as sns
 
 class Vcf_Data_Analysis(Variant_Calling_Format):    
     '''
@@ -63,6 +64,19 @@ class Vcf_Data_Analysis(Variant_Calling_Format):
                 except:
                     pass
         return het_dic, total_dic
+
+    def boxes_EFF_DP(self):
+        effs = ['INTERGENIC', 'INTRON', 'NON_SYNONYMOUS_CODING', 'SYNONYMOUS_CODING', 'OTHER']
+        dic = dict((eff, []) for eff in effs)
+        for rec in self.v:
+            if not rec.is_snp:
+                continue
+            try:
+                eff = rec.INFO['EFF'][0].split('(')[0]
+                dic[eff].append(int(rec.INFO['DP']))
+            except:
+                dic['OTHER'].append(int(rec.INFO['DP']))
+        return dic
 
 class Functions():
     def __init__(self):
@@ -126,8 +140,17 @@ class Functions():
         fig.suptitle('Number of Calls per Depth and Fraction of Calls which are Hz', fontsize = 'xx-large')
         plt.savefig('Het_Depth_dsitribution.pdf')
             
+    def plot_boxes(self, name = '../../../DataLists/CookbookData/standard.vcf.gz'):
+        vda = Vcf_Data_Analysis(name)
+        boxes = vda.boxes_EFF_DP()
+        fig, ax = plt.subplots(figsize = (16, 9))
+        sns.boxplot(data = list(boxes.values()), sym = '', ax = ax)
+        ax.set_xticklabels(boxes.keys())
+        ax.set_ylabel('DP (Variant)')
+        fig.suptitle('Distribution of Variant DP per SNP Site', fontsize = 'xx-large')
+        plt.savefig('EFF_boxplot.pdf')
 
 if __name__ == '__main__':
     f = Functions()
-    f.plot_bins_3()
+    f.plot_boxes()
 

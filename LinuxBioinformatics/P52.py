@@ -1,5 +1,7 @@
 import numpy as np
 import functools
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import vcf
 
@@ -32,7 +34,7 @@ def apply_win_funs(wins, funs):
 #Used in P49.py
 
 mq0_wins = {}
-vcf_names = ['centro.vcf.gz', 'standard.vcf.gz']
+vcf_names = ['/mnt/d/Codes/DataLists/CookbookData/centro.vcf.gz', '/mnt/d/Codes/DataLists/CookbookData/standard.vcf.gz']
 size = 5000
 
 def get_sample(rec, annot, my_type):
@@ -64,4 +66,4 @@ ax.set_xlabel('Genomic location in the downloaded segment')
 ax.set_ylabel('MQ0')
 fig.suptitle('Distribution of MQ0 along the genome', fontsize = 'xx-large')
 
-plt.show()
+plt.savefig('P52.png')

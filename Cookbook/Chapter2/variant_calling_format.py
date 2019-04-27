@@ -8,6 +8,7 @@ class Variant_Calling_Format():
 
     def __init__(self, filename = '../../../DataLists/CookbookData/genotypes.vcf.gz'):
         self.v = vcf.Reader(filename = filename)
+        self.filename = filename.split('/')[-1]
 
     def print_information(self):
         print('Variant Level Information')
@@ -39,8 +40,6 @@ class Variant_Calling_Format():
                 num_alts[len(rec.ALT)] += 1
         print(my_type)
         print(num_alts)
-
-    def 
 
 if __name__ == '__main__':
     VCF = Variant_Calling_Format()

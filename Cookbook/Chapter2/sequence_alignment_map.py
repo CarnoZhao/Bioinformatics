@@ -3,6 +3,8 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
+from collections import defaultdict
+import numpy as np
 
 class Sequence_Alignment_Map():
     '''
@@ -62,6 +64,26 @@ class Sequence_Alignment_Map():
         ax.plot(range(1, 77), [x / (n + 1) for x in counts])
         plt.savefig('mapped_position_distribution.pdf')
 
+    def phred_stack_plot(self, chrom = '20', start = 0, end = None):
+        '''
+        plot a stack plot of the phred quality according to positions, and show the necessary percentile of the phred distribution pre position
+        '''
+        cnts = defaultdict(list)
+        for rec in self.bam.fetch(chrom, start, end):
+            for i in range(rec.query_alignment_start, rec.query_alignment_end):
+                cnts[i].append(rec.query_qualities[i])
+        maxs = [max(cnts[i]) for i in range(76)]
+        tops = [np.percentile(cnts[i], 95) for i in range(76)]
+        medians = [np.percentile(cnts[i], 50) for i in range(76)]
+        bottoms = [np.percentile(cnts[i], 5) for i in range(76)]
+        max_fig = [x - y for x, y in zip(maxs, tops)]
+        top_fig = [x - y for x, y in zip(tops, medians)]
+        median_fig = [x - y for x, y in zip(medians, bottoms)]
+        fig, ax = plt.subplots(figsize = (16, 9))
+        ax.stackplot(range(1, 77), (bottoms, median_fig, top_fig, max_fig))
+        ax.plot(range(1, 77), maxs, 'k-')
+        plt.savefig('phred_stack_plot.pdf')
+
 
     def simplify_print(self, prefix, suffix):
         for suf in suffix:
@@ -72,4 +94,5 @@ if __name__ == '__main__':
     sam = Sequence_Alignment_Map()
     # sam.bam_header_information()
     # sam.bam_record_information()
-    sam.mapped_position_distribution()
+    # sam.mapped_position_distribution()
+    sam.phred_stack_plot()

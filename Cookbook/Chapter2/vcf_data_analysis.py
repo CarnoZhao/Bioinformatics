@@ -4,6 +4,7 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from variant_calling_format import Variant_Calling_Format
 import numpy as np
+from collections import defaultdict
 
 class Vcf_Data_Analysis(Variant_Calling_Format):    
     '''
@@ -43,6 +44,26 @@ class Vcf_Data_Analysis(Variant_Calling_Format):
                 bins[which_bin].append(int(sample['MQ0']))
         return bins
 
+    def bins_het_DP_distribution(self):
+        '''
+        plot the relationsip between hetrozygosity% and DP (read depth), and the relationsip between number of calls and DP
+        '''
+        het_dic = defaultdict(int)
+        total_dic = defaultdict(int)
+        for rec in self.v:
+            if not rec.is_snp:
+                continue
+            for sample in rec.samples:
+                try:
+                    if sample['DP'] == None:
+                        continue
+                    else:
+                        het_dic[int(sample['DP'])] += sample.is_het
+                        total_dic[int(sample['DP'])] += 1
+                except:
+                    pass
+        return het_dic, total_dic
+
 class Functions():
     def __init__(self):
         pass
@@ -72,7 +93,7 @@ class Functions():
             bins = vda.bins_MQ0_distribution(bin_num, total_length)
             bin_list[name + ' median'] = [np.median(x) if x else None for x in bins]
             bin_list[name + ' 75 percentile'] = [np.percentile(x, 75) if x else None for x in bins]
-        fia, ax = plt.subplots(figsize = (16, 9))
+        fig, ax = plt.subplots(figsize = (16, 9))
         x_axis = [x * total_length / bin_num for x in range(len(bins))]
         for name, bins in bin_list.items():
             ax.plot(x_axis, bins, 
@@ -86,7 +107,27 @@ class Functions():
         fig.suptitle('Distribution of MQ0 along the Genome', fontsize = 'xx-large')
         plt.savefig('MQ0_distribution.pdf')
 
+    def plot_bins_3(self, name_list = ['centro', 'standard']):
+        fig, ax = plt.subplots(figsize = (16, 9))
+        ax2 = ax.twinx()
+        colors = ['g', 'b']
+        for i, name in enumerate(name_list):
+            vda = Vcf_Data_Analysis('../../../DataLists/CookbookData/%s.vcf.gz' % name)
+            het, total = vda.bins_het_DP_distribution()
+            dps = sorted(total.keys())
+            ax.plot(dps, [het[dp] / total[dp] for dp in dps], color = colors[i], label = name)
+            ax2.plot(dps, [total[dp] for dp in dps], '--', color = colors[i])
+        ax.set_xlabel('Sample Read Depth (DP)')
+        ax.set_ylabel('Fraction of Heterozygate Calls')
+        ax2.set_ylabel('Number of Calls')
+        ax.set_xlim(0, 75)
+        ax.set_ylim(0, 0.2)
+        ax.legend()
+        fig.suptitle('Number of Calls per Depth and Fraction of Calls which are Hz', fontsize = 'xx-large')
+        plt.savefig('Het_Depth_dsitribution.pdf')
+            
+
 if __name__ == '__main__':
     f = Functions()
-    f.plot_bins_2()
+    f.plot_bins_3()
 

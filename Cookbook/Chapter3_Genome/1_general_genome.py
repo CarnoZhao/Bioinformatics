@@ -64,7 +64,7 @@ class General_Genome():
                 else:
                     col = (gc- bottom_GC) / (top_GC - bottom_GC)
                     body.fill_color = colors.Color(col, col, 1)
-                if block < len(chrom_GC) - 1:
+                if block < len(chrom_GC[chrom]) - 1:
                     body.scale = window_size
                 else:
                     body.scale = size % window_size

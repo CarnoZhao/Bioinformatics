@@ -1,6 +1,9 @@
 import gffutils
 import sqlite3
 from collections import defaultdict
+from Bio import Alphabet, Seq, SeqIO
+import gzip
+from general_genome import General_Genome
 
 class Generic_Feature_Format():
     '''
@@ -62,8 +65,38 @@ class Generic_Feature_Format():
         print('Number of mRNAs: %s' % num_mRNAs)
         print('Number of exons: %s' % num_exons)
 
+    def extract_genes(self, gene_id = 'AGAP004707'):
+        gene = self.gff[gene_id]
+        print('gene: ', gene)
+        print('gene seqid and strand: ', gene.seqid, gene.strand)
+        genome = General_Genome(gzip.open('../../../DataLists/CookbookData/gambiae.fa.gz', 'rt', encoding = 'utf-8'))
+        for rec in genome.fasta:
+            print('record description: ', rec.description)
+            if rec.description.split(':')[2] == gene.seqid:
+                seq = rec.seq
+                break
+        print(seq.alphabet)
+        mRNAs = self.gff.children(gene, featuretype = 'mRNA')
+        for mRNA in mRNAs:
+            print(mRNA.id)
+            if mRNA.id.endswith('RA'):
+                break
+        CDSs = self.gff.children(mRNA, featuretype = 'CDS', order_by = 'start')
+        gene_seq = self.get_sequence(seq, CDSs, gene.strand)
+        print(len(gene_seq), gene_seq[:10] + '...' + gene_seq[-10:])
+        prot = gene_seq.translate()
+        print(len(prot), prot[:10] + '...' + prot[-10:])
+
+    def get_sequence(self, seq, CDSs, strand):
+        retseq = Seq.Seq('', alphabet = Alphabet.IUPAC.unambiguous_dna)
+        for cds in CDSs:
+            inner = Seq.Seq(str(seq[cds.start - 1: cds.end]), alphabet = Alphabet.IUPAC.unambiguous_dna)
+            retseq += inner
+        return retseq if strand == '+' else retseq.reverse_complement()
+
 if __name__ == '__main__':
     gff = Generic_Feature_Format()
     # gff.print_feature_types()
     # gff.print_all_contigs()
-    gff.deeper_analysis()
+    # gff.deeper_analysis()
+    gff.extract_genes()

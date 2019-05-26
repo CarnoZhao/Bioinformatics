@@ -2,7 +2,7 @@ from Bio import SeqIO
 
 recs = SeqIO.parse(open('/mnt/d/Codes/DataLists/lncRNA/GRCh38_latest_rna.gbff'), 'gb')
 
-fw = open('len_gc.csv', 'w')
+fw = open('/mnt/d/Codes/DataLists/lncRNA/len_gc.csv', 'w')
 
 for rec in recs:
     ls = [x for x in rec.__dir__() if not x.startswith('_')]

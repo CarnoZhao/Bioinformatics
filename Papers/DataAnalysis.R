@@ -13,10 +13,13 @@ plot(hist2)
 
 d$is_mRNA = d$name == 'mRNA'
 
-graph = ggplot(d, aes(x = GC, y = log_len, color = is_mRNA)) + 
-        geom_point() + 
-        xlab('GC%') + 
-        ylab('length')
-plot(graph)
+print(summary(d[d$name == 'mRNA', 2]))
+print(summary(d[d$name != 'mRNA', 2]))
+
+# graph = ggplot(d, aes(x = GC, y = log_len, color = is_mRNA)) + 
+#         geom_point() + 
+#         xlab('GC%') + 
+#         ylab('length')
+# plot(graph)
 
 head(d)

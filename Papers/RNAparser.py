@@ -8,6 +8,7 @@ for rec in recs:
     ls = [x for x in rec.__dir__() if not x.startswith('_')]
     name = rec.annotations['molecule_type']
     if name == 'mRNA':
+        print(rec.features)
         for feature in rec.features:
             if feature.type == 'CDS':
                 break
@@ -21,5 +22,5 @@ for rec in recs:
     gc = (seq.count('G') + seq.count('C')) / len(seq)
     length = abs(end - start)
     fw.write('%s,%d,%.5f\n' % (name, length, gc))
-
+    break
 fw.close()

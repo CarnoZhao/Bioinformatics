@@ -35,6 +35,7 @@ one_step_cluster = function(input, i) {
     liver.markers = FindAllMarkers(liver, only.pos = T, min.pct = 0.25, logfc.threshold = 0.25)
     top10 = liver.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
     DoHeatmap(liver, features = top10$gene) + NoLegend()
+    write.csv(top10, file = paste('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Liver', i, '.csv', sep = ''), row.names = T)
     fc = top10 %>% group_by(cluster) %>% summarise(mean_avg_logFC = mean(avg_logFC))
     out.cluster = fc$cluster[fc$mean_avg_logFC == max(fc$mean_avg_logFC)]
     saveRDS(liver, paste('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Liver', i, '.rds', sep = ''))
@@ -43,7 +44,7 @@ one_step_cluster = function(input, i) {
 
 liver = orig.liver
 clst.array = c()
-for (i in 0:13) {
+for (i in 0:20) {
     filter = one_step_cluster(liver, i)
     filter.array = rep(i, length(filter))
     names(filter.array) = filter
@@ -52,12 +53,13 @@ for (i in 0:13) {
 }
 
 orig.liver = matrix_processing(orig.liver)
+orig.liver = RunTSNE(orig.liver, dims = 1:10)
 clusters = clst.array[names(orig.liver@active.ident)]
 clusters[is.na(names(clusters))] = i
 cells = names(orig.liver@active.ident)
 orig.liver@active.ident = factor(clusters)
 names(orig.liver@active.ident) = cells
-DimPlot(orig.liver)
+DimPlot(orig.liver, reduction = 'tsne')
 
 dev.off()
 

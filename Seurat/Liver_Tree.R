@@ -8,10 +8,12 @@
 library(dplyr)
 library(Seurat)
 
-pdf('/p200/liujiang_group/yinyao/Dataset/Seurat/Output.pdf')
+# pdf('/p200/liujiang_group/yinyao/Dataset/Seurat/Output.pdf')
+pdf('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Output.pdf')
 
 ### Load Data
-path = '/p200/liujiang_group/yinyao/Dataset/Seurat/GeneMatries/LiverMatrix/'
+# path = '/p200/liujiang_group/yinyao/Dataset/Seurat/GeneMatries/LiverMatrix/'
+path = '/mnt/d/Codes/DataLists/GeneMatries/LiverMatrix/'
 data = Read10X(data.dir = path)
 orig.liver = CreateSeuratObject(counts = data, project = 'Orig.Liver', min.cells = 3, min.features = 200)
 orig.liver = subset(orig.liver, subset = nFeature_RNA > 200 & nFeature_RNA < 2500)
@@ -28,31 +30,30 @@ matrix_processing = function(input) {
 
 
 ### First Clustering
-one_step_cluster = function(input) {
+one_step_cluster = function(input, i) {
     liver = matrix_processing(input)
     liver.markers = FindAllMarkers(liver, only.pos = T, min.pct = 0.25, logfc.threshold = 0.25)
     top10 = liver.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
     DoHeatmap(liver, features = top10$gene) + NoLegend()
     fc = top10 %>% group_by(cluster) %>% summarise(mean_avg_logFC = mean(avg_logFC))
     out.cluster = fc$cluster[fc$mean_avg_logFC == max(fc$mean_avg_logFC)]
+    saveRDS(liver, paste('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Liver', i, '.rds', sep = ''))
     return(names(liver@active.ident)[liver@active.ident == out.cluster])
 }
 
 liver = orig.liver
 clst.array = c()
-clst.num = 0
 for (i in 0:13) {
-    filter = one_step_cluster(liver)
-    filter.array = rep(clst.num, length(filter))
+    filter = one_step_cluster(liver, i)
+    filter.array = rep(i, length(filter))
     names(filter.array) = filter
     clst.array = c(clst.array, filter.array)
-    clst.num = clst.num + 1
     liver = subset(liver, cells = filter, invert = T)
 }
 
 orig.liver = matrix_processing(orig.liver)
 clusters = clst.array[names(orig.liver@active.ident)]
-clusters[is.na(names(clusters))] = clst.num
+clusters[is.na(names(clusters))] = i
 cells = names(orig.liver@active.ident)
 orig.liver@active.ident = factor(clusters)
 names(orig.liver@active.ident) = cells

@@ -23,6 +23,8 @@ matrix_processing = function(input) {
     liver = FindVariableFeatures(liver, selection.method = 'vst', nfeatures = 2000)
     liver = ScaleData(liver, features = rownames(liver))
     liver = RunPCA(liver, features = VariableFeatures(object = liver))
+    liver = RunTSNE(liver, dims = 1:10)
+    liver = RunUMAP(liver, dims = 1:10)
     liver = FindNeighbors(liver, dims = 1:10)
     liver = FindClusters(liver, resolution = 0.5)
     return(liver)
@@ -37,28 +39,24 @@ one_step_cluster = function(input, i) {
     DoHeatmap(liver, features = top10$gene) + NoLegend()
     write.csv(top10, file = paste('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Liver', i, '.csv', sep = ''), row.names = T)
     fc = top10 %>% group_by(cluster) %>% summarise(mean_avg_logFC = mean(avg_logFC))
-    out.cluster = fc$cluster[fc$mean_avg_logFC == max(fc$mean_avg_logFC)]
+    out.cluster = fc$cluster[rev(order(fc$mean_avg_logFC))[1:2]]
     saveRDS(liver, paste('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Liver', i, '.rds', sep = ''))
-    return(names(liver@active.ident)[liver@active.ident == out.cluster])
+    return(liver@active.ident[liver@active.ident %in% out.cluster])
 }
 
 liver = orig.liver
-clst.array = c()
-for (i in 0:20) {
+ident = orig.liver@active.ident
+i = 0
+filter = NULL
+while (length(liver@active.ident) != 0) {
     filter = one_step_cluster(liver, i)
-    filter.array = rep(i, length(filter))
-    names(filter.array) = filter
-    clst.array = c(clst.array, filter.array)
+    ident[names(filter)] = filter + i
     liver = subset(liver, cells = filter, invert = T)
+    i = i + 2
 }
 
 orig.liver = matrix_processing(orig.liver)
-orig.liver = RunTSNE(orig.liver, dims = 1:10)
-clusters = clst.array[names(orig.liver@active.ident)]
-clusters[is.na(names(clusters))] = i
-cells = names(orig.liver@active.ident)
-orig.liver@active.ident = factor(clusters)
-names(orig.liver@active.ident) = cells
+orig.liver@active.ident = as.factor(ident)
 DimPlot(orig.liver, reduction = 'tsne')
 
 dev.off()

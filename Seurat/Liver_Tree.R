@@ -8,15 +8,10 @@
 library(dplyr)
 library(Seurat)
 
-# pdf('/p200/liujiang_group/yinyao/Dataset/Seurat/Output.pdf')
-pdf('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Output.pdf')
-
-### Load Data
-# path = '/p200/liujiang_group/yinyao/Dataset/Seurat/GeneMatries/LiverMatrix/'
 path = '/mnt/d/Codes/DataLists/GeneMatries/LiverMatrix/'
 data = Read10X(data.dir = path)
 orig.liver = CreateSeuratObject(counts = data, project = 'Orig.Liver', min.cells = 3, min.features = 200)
-orig.liver = subset(orig.liver, subset = nFeature_RNA > 200 & nFeature_RNA < 2500)
+orig.liver = subset(orig.liver, subset = nFeature_RNA > 200)
 
 matrix_processing = function(input) {
     liver = NormalizeData(input, normalization.method = 'LogNormalize', scale.factor = 10000)
@@ -35,12 +30,14 @@ matrix_processing = function(input) {
 one_step_cluster = function(input, i) {
     liver = matrix_processing(input)
     liver.markers = FindAllMarkers(liver, only.pos = T, min.pct = 0.25, logfc.threshold = 0.25)
-    top10 = liver.markers %>% group_by(cluster) %>% top_n(n = 10, wt = avg_logFC)
+    top12 = liver.markers %>% group_by(cluster) %>% top_n(n = 12, wt = avg_logFC)
+    pdf(paste('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Liver', i, '.pdf', sep = ''))
     DoHeatmap(liver, features = top10$gene) + NoLegend()
-    write.csv(top10, file = paste('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Liver', i, '.csv', sep = ''), row.names = T)
-    fc = top10 %>% group_by(cluster) %>% summarise(mean_avg_logFC = mean(avg_logFC))
+    dev.off()
+    write.csv(top12, file = paste('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Liver', i, '.csv', sep = ''), row.names = T)
+    fc = top12 %>% group_by(cluster) %>% summarise(mean_avg_logFC = mean(avg_logFC))
     out.cluster = fc$cluster[rev(order(fc$mean_avg_logFC))[1:2]]
-    saveRDS(liver, paste('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Liver', i, '.rds', sep = ''))
+    saveRDS(liver, file = paste('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Liver', i, '.rds', sep = ''), compress = T)
     return(liver@active.ident[liver@active.ident %in% out.cluster])
 }
 
@@ -55,9 +52,10 @@ while (length(liver@active.ident) != 0) {
     i = i + 2
 }
 
+pdf('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Output.pdf')
 orig.liver = matrix_processing(orig.liver)
 orig.liver@active.ident = as.factor(ident)
-DimPlot(orig.liver, reduction = 'tsne')
+DimPlot(orig.liver, reduction = 'umap')
 
 dev.off()
 

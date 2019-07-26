@@ -8,6 +8,9 @@
 library(dplyr)
 library(Seurat)
 
+# liver = readRDS('/mnt/d/Codes/DataLists/GeneMatries/Liver.rds')
+# marker = read.csv('/mnt/d/Codes/DataLists/GeneMatries/Markers.csv', header = T, row.names = 1)
+
 path = '/mnt/d/Codes/DataLists/GeneMatries/LiverMatrix/'
 data = Read10X(data.dir = path)
 orig.liver = CreateSeuratObject(counts = data, project = 'Orig.Liver', min.cells = 3, min.features = 200)
@@ -31,9 +34,8 @@ one_step_cluster = function(input, i) {
     liver = matrix_processing(input)
     liver.markers = FindAllMarkers(liver, only.pos = T, min.pct = 0.25, logfc.threshold = 0.25)
     top12 = liver.markers %>% group_by(cluster) %>% top_n(n = 12, wt = avg_logFC)
-    pdf(paste('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Liver', i, '.pdf', sep = ''))
-    DoHeatmap(liver, features = top10$gene) + NoLegend()
-    dev.off()
+    graph = DoHeatmap(liver, features = top12$gene) + NoLegend()
+    plot(graph)
     write.csv(top12, file = paste('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Liver', i, '.csv', sep = ''), row.names = T)
     fc = top12 %>% group_by(cluster) %>% summarise(mean_avg_logFC = mean(avg_logFC))
     out.cluster = fc$cluster[rev(order(fc$mean_avg_logFC))[1:2]]
@@ -42,14 +44,15 @@ one_step_cluster = function(input, i) {
 }
 
 liver = orig.liver
-ident = orig.liver@active.ident
+cells = names(orig.liver@active.ident)
+ident = as.vector(orig.liver@active.ident)
+names(ident) = cells
 i = 0
-filter = NULL
 while (length(liver@active.ident) != 0) {
     filter = one_step_cluster(liver, i)
-    ident[names(filter)] = filter + i
-    liver = subset(liver, cells = filter, invert = T)
-    i = i + 2
+    ident[names(filter)] = paste(i, filter, sep = '_')
+    liver = subset(liver, cells = names(filter), invert = T)
+    i = i + 1
 }
 
 pdf('/mnt/d/Codes/DataLists/GeneMatries/LiverOutput/Output.pdf')

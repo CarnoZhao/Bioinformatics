@@ -5,7 +5,8 @@ library(ggplot2)
 path = '/mnt/d/Codes/DataLists/GeneMatries/LiverMatrix/'
 data = Read10X(data.dir = path)
 liver = CreateSeuratObject(counts = data, project = 'Liver', min.cells = 3, min.features = 200)
-liver = subset(liver, subset = nFeature_RNA > 200)
+liver[["percent.mt"]] = PercentageFeatureSet(liver, pattern = "^MT-")
+liver = subset(liver, subset = nFeature_RNA > 500 & percent.mt < 10)
 
 matrix_processing = function(input, reso) {
   liver = NormalizeData(input, normalization.method = 'LogNormalize', scale.factor = 10000)
@@ -20,7 +21,7 @@ matrix_processing = function(input, reso) {
 }
 # 
 ### first clustering
-liver = matrix_processing(liver, 0.4)
+liver = matrix_processing(liver, 0.8)
 
 
 liver.markers = FindAllMarkers(liver, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
@@ -29,6 +30,7 @@ graph = DoHeatmap(liver, features = top12$gene) + NoLegend()
 plot(graph)
 
 DimPlot(liver, reduction = 'umap', label = T, label.size = 5)
+DimPlot(liver, reduction = 'tsne', label = T, label.size = 5)
 
 backup_cluster = liver@active.ident
 map = c('12' = 'Endothe', '9' = 'Macroph', '10' = 'Hematopo', '4' = 'Hepatocyte', '8' = 'Hepatoblast', '11' = 'Mesenchy', '13' = 'Megakaryocyte')
@@ -66,6 +68,7 @@ ggsave('/mnt/d/Codes/DataLists/GeneMatries/TotalCluster.png')
 
 liver = readRDS('/mnt/d/Codes/DataLists/GeneMatries/Liver.rds')
 markers = FindAllMarkers(liver, only.pos = T, min.pct = 0.25, logfc.threshold = 0.25)
+markers = read.csv('/mnt/d/Codes/DataLists/GeneMatries/markers.csv', row.names = 1, header = T)
 top12 = markers %>% group_by(cluster) %>% top_n(n = 12, wt = avg_logFC)
 DoHeatmap(liver, features = top12$gene) + NoLegend()
 

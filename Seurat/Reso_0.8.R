@@ -12,7 +12,7 @@ matrix_processing = function(input, reso) {
     liver = FindClusters(liver, resolution = reso)
     return(liver)
 }
-load.orig = function(){
+load_origin_data = function(){
     path = '/mnt/d/Codes/DataLists/GeneMatries/LiverMatrix/'
     data = Read10X(data.dir = path)
     liver = CreateSeuratObject(counts = data, project = 'Liver', min.cells = 3, min.features = 200)
@@ -21,6 +21,7 @@ load.orig = function(){
     liver
 }
 
+liver = load_origin_data()
 liver = matrix_processing(liver, 0.8)
 
 saveRDS(liver, '/mnt/d/Codes/DataLists/GeneMatries/Liver.rds', compress = T)
@@ -57,7 +58,7 @@ g = function(i){
 }
 
 ### 11
-liver = load.orig()
+liver = load_origin_data()
 liver = subset(liver, cells = cell11)
 liver = matrix_processing(liver, 0.6)
 markers = FindAllMarkers(liver, only.pos = T, min.pct = 0.25, logfc.threshold = 0.25)
@@ -65,7 +66,7 @@ cell_Endo = names(liver@active.ident[liver$seurat_clusters == 0])
 cell_Mesen = names(liver@active.ident[liver$seurat_clusters == 1])
 
 ### 10
-liver = load.orig()
+liver = load_origin_data()
 liver = subset(liver, cells = cell10)
 liver = matrix_processing(liver, 0.6)
 markers = FindAllMarkers(liver, only.pos = T, min.pct = 0.25, logfc.threshold = 0.25)

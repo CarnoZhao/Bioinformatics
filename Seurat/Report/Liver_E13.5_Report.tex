@@ -1,0 +1,80 @@
+\documentclass[lang=en]{elegantpaper}   
+
+\title{Liver E13.5 Clustering Report}
+\author{Xun Zhao}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Seurat Codes and Parameters}
+% Codes here
+\section{Clustering and Annotation}
+
+\subsection{Clustering 1}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{Cluster_unlabeled.png}
+    \caption{Unlabeled Clusters \label{unlabel_total}}
+\end{figure}
+
+\figref{unlabel_total} is clustering result using 0.8 resolution. RDS file is available in \lstinline{/p200/liujiang_group/yinyao/Dataset/Seurat/Liver.rds}. After extracting markers, some of these clusters can be annotated, but others need further clustering, like C11 (cluster 11, purple), which consists of two parts away form each other.
+
+\subsection{Annotation 1}
+
+\emph{Afp}, \emph{Alb} are reported as the markers of hepatocyte or hepatoblast\citep{gordillo_orchestrating_2015, chaudhari_expression_2016, su_single-cell_2017, han_mapping_2018}. Moreover, besides \emph{Afp} and \emph{Alb}, hepatocyte also expresses \emph{Hnf4$\alpha$} and \emph{Prox1}\citep{gordillo_orchestrating_2015}. Therefore, C6 and C13 are annotated as hepatocyte and hepatoblast, respectively, for their high expression of \emph{Afp} and \emph{Alb}, and for expression of \emph{Hnf4$\alpha$} and \emph{Prox1} in C13 (\figref{6_13}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{6_13.png}
+    \caption{Markers of C6/C13 \label{6_13}}
+\end{figure}
+
+\emph{Cd68, Marco} are reported as the markers of macrophage\citep{su_single-cell_2017, han_mapping_2018}, so C12 is annotated as macrophage. \emph{Ppbp, Itga2b} are reported as the markers of megakaryocyte\citep{su_single-cell_2017}, so C14 is annotated as megakaryocyte (\figref{12_14}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.6\textwidth]{12_14.png}
+    \caption{Markers of C12/C14 \label{12_14}}
+\end{figure}
+
+However, in C10, there are two kinds of cell markers, stem cells' and neutrophils'. Similarly, in C11, there are endothelial cells' and mesenchymal cells'. So they need further clustering.
+
+\subsection{Clustering 2}
+
+In order to simply divide one cluster into fewer parts, the resolution used in this part is 0.6. 
+
+\paragraph{Cluster 10} C10 is divided into 3 parts (\figref{10-2}), saved as \lstinline{/p200/liujiang_group/yinyao/Dataset/Seurat/Liver_C10.rds}. Stem cell marker \emph{Cd34, Cmtm7}\citep{han_mapping_2018} are highly expressed in subcluster 0 of C10. Neutrophil marker \emph{S100a9, S100a8}\citep{han_mapping_2018} are highly expressed in subcluster 2 of C10. The annotation of subcluster 1 is not defined yet.
+
+\begin{figure}[htbp]
+    \begin{minipage}[htbp]{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{image/liver10_cluster.png}
+        \caption{Subclusters of C10 \label{10_clus}}
+    \end{minipage}
+    \begin{minipage}[htbp]{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{image/liver10_featureplot.png}
+        \caption{Stem and Neutrophil Markers in C10 \label{10_feat}}
+    \end{minipage}
+\end{figure}
+
+\paragraph{Cluster 11} C11 is divided into 2 parts as expected, one of which is annotated as endothelial cell and the other is annotated as mesenchymal cell, due to the endothelial marker \emph{Lyve1, Kdr}\citep{gordillo_orchestrating_2015} in subcluster 0, and the mesenchymal marker \emph{Pdgfra, Col1a2}\citep{han_mapping_2018} in subcluster 1.\citep{}
+
+\begin{figure}[htbp]
+    \begin{minipage}[htbp]{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.6\linewidth]{image/liver11_cluster.png}
+        \caption{Endothelial and Mesenchymal Markers in C11 \label{11_clus}}
+    \end{minipage}
+    \begin{minipage}[htbp]{0.5\textwidth}
+        \centering
+        \includegraphics[width=0.6\linewidth]{image/liver11_featureplot.png}
+        \caption{Endothelial and Mesenchymal Markers in C11 \label{11_feat}}
+    \end{minipage}
+\end{figure}
+
+\bibliography{LiverDevelopment}
+
+\end{document}

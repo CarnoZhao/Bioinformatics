@@ -92,4 +92,8 @@ liver$seurat_clusters = ident
 DimPlot(liver, reduction = 'umap', label = T)
 DimPlot(subset(liver, subset = seurat_clusters != 3), reduction = 'umap', label = T)
 
+cnts = data.frame(cnt = liver$nCount_RNA, cluster = liver$seurat_clusters)
+ggplot(cnts, aes(x = cluster, y = log(cnt), color = cluster, fill = cluster, alpha = I(0.7))) + geom_boxplot()
 
+feats = data.frame(cnt = liver$nFeature_RNA, cluster = liver$seurat_clusters)
+ggplot(feats, aes(x = cluster, y = log(cnt), color = cluster, fill = cluster, alpha = I(0.7))) + geom_boxplot()

@@ -14,16 +14,16 @@ matrix_processing = function(input, reso) {
 }
 
 liver = readRDS('Liver.rds')
-d = DimPlot(liver, reduction = 'umap', label = T)
+d = DimPlot(liver, reduction = 'umap', label = T, label.size = 6)
 f613 = FeaturePlot(liver, c('Afp', 'Alb', 'Hnf4a', 'Prox1'))
 f1214 = FeaturePlot(liver, c('Cd68', 'Marco', 'Ppbp', 'Itga2b'))
 fe = FeaturePlot(liver, c('Hba-a2', 'Hba-a1', 'Hbb-bs', 'Hbb-bt'))
 fep = FeaturePlot(liver, c('Klf1', 'Alad', 'Blvrb', 'Gata1'))
-ggsave('d.png', d, scale = 2)
+ggsave('d.png', d)
 ggsave('f613.png', f613, scale = 2)
 ggsave('f1214.png', f1214, scale = 2)
 ggsave('fe.png', fe, scale = 2)
-ggsave('fep.png', fp, scale = 2)
+ggsave('fep.png', fep, scale = 2)
 
 liver10 = subset(liver, subset = seurat_clusters == 10)
 if (!file.exists('liver10.rds')){
@@ -32,12 +32,12 @@ if (!file.exists('liver10.rds')){
 } else {
     liver10 = readRDS('liver10.rds')
 }
-d10 = DimPlot(liver10, reduction = 'umap', label = T)
+d10 = DimPlot(liver10, reduction = 'umap', label = T, label.size = 6)
 cell_Neutr = names(liver10@active.ident[liver10$seurat_clusters == 2])
 cell_Stem = names(liver10@active.ident[liver10$seurat_clusters == 0])
 f10 = FeaturePlot(liver10, c('Cd34', 'Cmtm7', 'S100a9', 'S100a8'))
 f10t = FeaturePlot(liver, c('Cd34', 'Cmtm7', 'S100a9', 'S100a8'))
-ggsave('d10.png', d10, scale = 2)
+ggsave('d10.png', d10)
 ggsave('f10.png', f10, scale = 2)
 ggsave('f10t.png', f10t, scale = 2)
 
@@ -49,12 +49,12 @@ if (!file.exists('liver11.rds')){
 } else {
     liver11 = readRDS('liver11.rds')
 }
-d11 = DimPlot(liver11, reduction = 'umap', label = T)
+d11 = DimPlot(liver11, reduction = 'umap', label = T, label.size = 6)
 cell_Endo = names(liver11@active.ident[liver11$seurat_clusters == 0])
 cell_Mesen = names(liver11@active.ident[liver11$seurat_clusters == 1])
 f11 = FeaturePlot(liver11, c('Lyve1', 'Kdr', 'Pdgfra', 'Col1a2'))
 f11t = FeaturePlot(liver, c('Lyve1', 'Kdr', 'Pdgfra', 'Col1a2'))
-ggsave('d11.png', d11, scale = 2)
+ggsave('d11.png', d11)
 ggsave('f11.png', f11, scale = 2)
 ggsave('f11t.png', f11t, scale = 2)
 
@@ -84,5 +84,5 @@ liver@active.ident = ident
 liver$seurat_clusters = ident
 saveRDS(liver, 'liver_labeled.rds', compress = T)
 dt = DimPlot(liver, reduction = 'umap', label = T)
-ggsave('dt.png', dt, scale = 2)
+ggsave('dt.png', dt)
 

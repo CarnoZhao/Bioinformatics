@@ -14,8 +14,12 @@ matrix_processing = function(input, reso) {
 }
 
 liver = readRDS('Liver.rds')
-# markers = FindAllMarkers(liver, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
-# write.csv(markers, 'markers.csv')
+d = DimPlot(liver, reduction = 'umap', label = T)
+f613 = FeaturePlot(liver, c('Afp', 'Alb', 'Hnf4a', 'Prox1'))
+f1214 = FeaturePlot(liver, c('Cd68', 'Marco', 'Ppbp', 'Itga2b'))
+ggsave('d.png', d, scale = 2)
+ggsave('d613.png', f613, scale = 2)
+ggsave('d1214.png', f1214, scale = 2)
 
 liver10 = subset(liver, subset = seurat_clusters == 10)
 if (!file.exists('liver10.rds')){
@@ -28,8 +32,10 @@ d10 = DimPlot(liver10, reduction = 'umap', label = T)
 cell_Neutr = names(liver10@active.ident[liver10$seurat_clusters == 2])
 cell_Stem = names(liver10@active.ident[liver10$seurat_clusters == 0])
 f10 = FeaturePlot(liver10, c('Cd34', 'Cmtm7', 'S100a9', 'S100a8'))
+f10t = FeaturePlot(liver, c('Cd34', 'Cmtm7', 'S100a9', 'S100a8'))
 ggsave('d10.png', d10, scale = 2)
 ggsave('f10.png', f10, scale = 2)
+ggsave('f10t.png', f10t, scale = 2)
 
 
 liver11 = subset(liver, subset = seurat_clusters == 11)
@@ -43,8 +49,10 @@ d11 = DimPlot(liver11, reduction = 'umap', label = T)
 cell_Endo = names(liver11@active.ident[liver11$seurat_clusters == 0])
 cell_Mesen = names(liver11@active.ident[liver11$seurat_clusters == 1])
 f11 = FeaturePlot(liver11, c('Lyve1', 'Kdr', 'Pdgfra', 'Col1a2'))
+f11t = FeaturePlot(liver, c('Lyve1', 'Kdr', 'Pdgfra', 'Col1a2'))
 ggsave('d11.png', d11, scale = 2)
 ggsave('f11.png', f11, scale = 2)
+ggsave('f11t.png', f11t, scale = 2)
 
 map = c('6'  = 'Hepatoblast',
         '13' = 'Hepatocyte',

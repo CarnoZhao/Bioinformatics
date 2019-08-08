@@ -10,3 +10,6 @@ nohup.out
 *.out
 *.synctex.gz
 *.xdv
+Satija*
+*.h5
+*.gtf

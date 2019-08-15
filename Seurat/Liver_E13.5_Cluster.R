@@ -24,6 +24,7 @@ matrix_processing = function(input, reso) {
 liver = matrix_processing(liver, 0.8)
 
 
+
 liver.markers = FindAllMarkers(liver, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 top12 = liver.markers %>% group_by(cluster) %>% top_n(n = 12, wt = avg_logFC)
 graph = DoHeatmap(liver, features = top12$gene) + NoLegend()
